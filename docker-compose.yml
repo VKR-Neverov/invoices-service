@@ -1,0 +1,24 @@
+version: '3'
+
+networks:
+  zoo:
+    external: true
+
+services:
+  database-test:
+    container_name: invoices-service-db-test
+    image: postgres
+    restart: always
+    networks:
+      - zoo
+    volumes:
+      - invoices-service-db-test-volume:/var/lib/postgresql
+    ports:
+      - "45001:5432"
+    environment:
+      POSTGRES_USER: invoices-service
+      POSTGRES_PASSWORD: invoices-service
+      POSTGRES_DB: invoices-service
+
+volumes:
+  invoices-service-db-test-volume:

@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package invoices_service;
+
+option go_package = "github.com/fidesy-pay/invoices-service;invoices_service";
+
+import "google/protobuf/timestamp.proto";
+
+service InvoicesService {
+  rpc CreateInvoice(CreateInvoiceRequest) returns (CreateInvoiceResponse);
+  rpc CheckInvoice(CheckInvoiceRequest) returns (CheckInvoiceResponse);
+  rpc UpdateInvoice(UpdateInvoiceRequest) returns (UpdateInvoiceResponse);
+  rpc ListInvoices(ListInvoicesRequest) returns (ListInvoicesResponse);
+}
+
+message Invoice {
+  string id = 1;
+  string client_id = 2;
+  double usd_amount = 3;
+  double token_amount = 4;
+  string chain = 5;
+  string token = 6;
+  InvoiceStatus status = 7;
+  string address = 8;
+  google.protobuf.Timestamp created_at = 9;
+  string payer_client_id = 10;
+}
+
+message CreateInvoiceRequest {
+  string client_id = 1;
+  double usd_amount = 2;
+}
+
+message CreateInvoiceResponse {
+  // Invoice identifier
+  string id = 1;
+}
+
+message CheckInvoiceRequest {
+  // Invoice identifier
+  string id = 1;
+}
+
+enum InvoiceStatus {
+  UNKNOWN_STATUS = 0;
+  NEW = 1;
+  PENDING = 2;
+  FAILED = 3;
+  SUCCESS = 4;
+  EXPIRED = 5;
+  // Send received funds to client
+  SENDING_TO_CLIENT = 6;
+  // If invoice is stuck and not sending crypto to client
+  // then set such status to manually control situation
+  MANUAL_CONTROL = 7;
+}
+
+message CheckInvoiceResponse {
+  Invoice invoice = 1;
+}
+
+message UpdateInvoiceRequest {
+  string id = 1;
+  string chain = 2;
+  string token = 3;
+  optional string payer_client_id = 4;
+}
+
+message UpdateInvoiceResponse {
+  Invoice invoice = 1;
+}
+
+message ListInvoicesRequest {
+  message Filter {
+    repeated string id_in = 1;
+    repeated string client_id_in = 2;
+    repeated InvoiceStatus invoice_status_in = 3;
+  }
+
+  Filter filter = 1;
+  uint64 page = 2;
+  uint64 per_page = 3;
+}
+
+message ListInvoicesResponse {
+  repeated Invoice invoices = 1;
+}
